@@ -50,9 +50,15 @@ func (i *index) Close() error {
 	if err := i.mmap.Sync(gommap.MS_SYNC); err != nil {
 		return err
 	}
+
+	if err := i.mmap.UnsafeUnmap(); err != nil {
+		return err
+	}
+
 	if err := i.file.Sync(); err != nil {
 		return err
 	}
+
 	if err := i.file.Truncate(int64(i.size)); err != nil {
 		return err
 	}
@@ -76,7 +82,7 @@ func (i *index) Read(in int64) (out uint32, pos uint64, err error) {
 		return 0, 0, io.EOF
 	}
 	out = enc.Uint32(i.mmap[pos : pos+offWidth])
-	out = enc.Uint32(i.mmap[pos+offWidth : pos+entWidth])
+	pos = enc.Uint64(i.mmap[pos+offWidth : pos+entWidth])
 	return out, pos, nil
 }
 

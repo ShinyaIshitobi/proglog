@@ -35,7 +35,7 @@ func TestSegment(t *testing.T) {
 	}
 
 	_, err = s.Append(want)
-	require.NoError(t, err)
+	require.Error(t, err)
 
 	require.True(t, s.IsMaxed())
 	require.NoError(t, s.Close())

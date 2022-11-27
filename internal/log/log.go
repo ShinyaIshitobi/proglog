@@ -115,9 +115,12 @@ func (l *Log) Read(off uint64) (*api.Record, error) {
 	}
 
 	if s == nil || s.nextOffset <= off {
-		return nil, fmt.Errorf("offset out of range: %d", off)
+		return nil, api.ErrorOffsetOutOfRange{Offset: off}
 	}
 
+	if s == nil {
+		return nil, fmt.Errorf("offset out of range: %d", off)
+	}
 	return s.Read(off)
 }
 
@@ -169,7 +172,7 @@ func (l *Log) highestOffset() (uint64, error) {
 
 func (l *Log) Truncate(lowest uint64) error {
 	l.mu.Lock()
-	defer l.mu.RLock()
+	defer l.mu.Unlock()
 
 	var segments []*segment
 	for _, s := range l.segments {
